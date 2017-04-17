@@ -1,0 +1,14 @@
+{
+  "name": "packet-to-twitter",
+  "version": "1.0.0",
+  "description": "Node.js app providing Amateur Radio Packet to Twitter interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kevin Hooke",
+  "license": "MIT",
+  "dependencies": {
+    "oauth": "^0.9.15"
+  }
+}
