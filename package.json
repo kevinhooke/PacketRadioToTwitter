@@ -9,6 +9,7 @@
   "author": "Kevin Hooke",
   "license": "MIT",
   "dependencies": {
-    "oauth": "^0.9.15"
+    "oauth": "^0.9.15",
+    "ax25": "^1.1.2"
   }
 }

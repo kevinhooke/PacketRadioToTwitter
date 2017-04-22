@@ -1,0 +1,8 @@
+{
+  "serialport" : "/dev/pts/2",
+  "sendTweetEnabled" : "false",
+  "twitterConsumerKey" : "",
+  "twitterSecretKey" : "",
+  "accessToken" : "",
+  "accessTokenSecret" : ""
+}
