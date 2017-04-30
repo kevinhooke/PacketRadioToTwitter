@@ -1,5 +1,6 @@
 var OAuth = require("oauth");
 var ax25 = require("ax25");
+var TweetCache = require('./tweet-cache.js');
 
 //load config from file
 var config = require("./config/config.json");
@@ -49,9 +50,10 @@ var oauth = new OAuth.OAuth(
     'HMAC-SHA1'
 );
 
+//TNC-Pi serial port only connects at 19200
 var tnc = new ax25.kissTNC(
     {	serialPort : config.serialport,
-        baudRate : 9600
+        baudRate : 19200
     }
 );
 
@@ -64,35 +66,60 @@ tnc.on("frame",
             console.log(">  " + packet.infoString);
         }
 
+        var fromStation = formatCallsign(packet.sourceCallsign, packet.sourceSSID);
+        var toStation = formatCallsign(packet.destinationCallsign, packet.destinationSSID);
+
         var status = ({
             'status' : 'Received station: '
-                + formatCallsign(packet.sourceCallsign, packet.sourceSSID)
+                + fromStation
                 + ' sending to: '
-                + formatCallsign(packet.destinationCallsign, packet.destinationSSID)
+                + toStation
                 + ' : '
                 + packet.infoString
         });
 
         console.log(new Date() + status);
 
-        if(config.sendTweetEnabled == "true") {
-            oauth.post('https://api.twitter.com/1.1/statuses/update.json',
-                config.accessToken,
-                config.accessTokenSecret,
-                status,
-                function (error, data) {
-                    console.log('\nPOST status:\n');
-                    console.log(error || data);
-                });
+        //check ignore list (e.g. for WINLINK nodes
+        if(config.ignoreList.indexOf(fromStation) == -1 && config.ignoreList.indexOf(toStation) == -1 ) {
+            console.log("config.ignoreList check: fromStation / toStation is not in ignore list");
+
+            TweetCache.insert({
+                'from': formatCallsign(packet.sourceCallsign, packet.sourceSSID),
+                'to': formatCallsign(packet.destinationCallsign, packet.destinationSSID),
+                'infoString': packet.infoString,
+                'tweet': status.status
+            });
+
+            if (config.sendTweetEnabled == "true") {
+
+                //TOOD: does tweet still exist in cache?
+                //if not, send, else skip
+                //if sending new tweet, add to cache with a 30min expiry
+
+                //key/value in cache: key=tweetcontent, value=timestamp when last heard, expiry=30mins
+
+                oauth.post('https://api.twitter.com/1.1/statuses/update.json',
+                    config.accessToken,
+                    config.accessTokenSecret,
+                    status,
+                    function (error, data) {
+                        console.log('\nPOST status:\n');
+                        console.log(error || data);
+                    });
+            }
+            else {
+                console.log("config.sendTweetEnabled: false, status: " + JSON.stringify(status));
+            }
         }
         else{
-            console.log("config.sendTweetEnabled: false, status: " + JSON.stringify(status));
+            console.log("config.ignoreList check: IGNORING - to or from station IS in ignoreList");
         }
     }
 );
 
 
-
+// node oauth api examples
 // //GET /search/tweets.json
 // oauth.get(
 //     'https://api.twitter.com/1.1/search/tweets.json?q=%40twitterapi',

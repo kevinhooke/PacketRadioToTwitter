@@ -4,5 +4,6 @@
   "twitterConsumerKey" : "",
   "twitterSecretKey" : "",
   "accessToken" : "",
-  "accessTokenSecret" : ""
+  "accessTokenSecret" : "",
+  "ignoreList" : [  ]
 }
