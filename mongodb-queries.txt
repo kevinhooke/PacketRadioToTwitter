@@ -1,0 +1,2 @@
+db.tweets.find({}, { "_id" : 0, "from" : 1, "to" : 1, "heardTimes" : 1  }).sort({"heardTimes" : -1})
+

@@ -89,28 +89,33 @@ tnc.on("frame",
                 'to': formatCallsign(packet.destinationCallsign, packet.destinationSSID),
                 'infoString': packet.infoString,
                 'tweet': status.status
-            });
+                },
+                function (result){
+                    console.log("Callback after TweetCache.insert() was called!");
+                    console.log(JSON.stringify(result));
 
-            if (config.sendTweetEnabled == "true") {
+                    if (config.sendTweetEnabled == "true") {
 
-                //TOOD: does tweet still exist in cache?
-                //if not, send, else skip
-                //if sending new tweet, add to cache with a 30min expiry
+                        //TOOD: does tweet still exist in cache?
+                        //if not, send, else skip
+                        //if sending new tweet, add to cache with a 30min expiry
 
-                //key/value in cache: key=tweetcontent, value=timestamp when last heard, expiry=30mins
+                        //key/value in cache: key=tweetcontent, value=timestamp when last heard, expiry=30mins
 
-                oauth.post('https://api.twitter.com/1.1/statuses/update.json',
-                    config.accessToken,
-                    config.accessTokenSecret,
-                    status,
-                    function (error, data) {
-                        console.log('\nPOST status:\n');
-                        console.log(error || data);
-                    });
-            }
-            else {
-                console.log("config.sendTweetEnabled: false, status: " + JSON.stringify(status));
-            }
+                        oauth.post('https://api.twitter.com/1.1/statuses/update.json',
+                            config.accessToken,
+                            config.accessTokenSecret,
+                            status,
+                            function (error, data) {
+                                console.log('\nPOST status:\n');
+                                console.log(error || data);
+                            });
+                    }
+                    else {
+                        console.log("config.sendTweetEnabled: false, status: " + JSON.stringify(status));
+                    }
+                }
+            );
         }
         else{
             console.log("config.ignoreList check: IGNORING - to or from station IS in ignoreList");
