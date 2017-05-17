@@ -9,15 +9,19 @@ var TweetCache = {
         console.log('insert: ' + JSON.stringify(document));
         MongoClient.connect(url).then(function (db) {
 
-            //add $lt 30 mins to search
-            document.$lt = {lastTweet: moment().subtract(12, 'hours').calendar()};
-
+            //search for whether this packet was last tweeted more than 12 hours ago
+            var lastTweetedBeforeDateToAvoidDuplicates = moment().utc().subtract(12, 'hours').toDate();
+            console.log("Checking for lastTweet before: " + lastTweetedBeforeDateToAvoidDuplicates);
+            document.lastTweet = {'$lt' : lastTweetedBeforeDateToAvoidDuplicates};
+            console.log("findOne query: " + JSON.stringify(document));
             db.collection('tweets').findOne(document).then(function (olderResult) {
                 console.log("findOne older than 12 hours, result: " + JSON.stringify(olderResult));
                 var updateProperties = {};
                 var now = new Date();
+                var sendTweet = false;
 
                 if (olderResult != null) {
+                    sendTweet = true;
                     updateProperties = {
                         lastHeard: now,
                         lastTweet: now
@@ -45,6 +49,13 @@ var TweetCache = {
                     //tweet if new packet received
                     //tweet if duplicate but older than the TTL
                     //otherwise, no tweet
+
+                    if(response.upserted != null || sendTweet) {
+                        response.sendTweet = true;
+                    }
+                    else{
+                        response.sendTweet = false;
+                    }
                     callback(response);
                 });
             });

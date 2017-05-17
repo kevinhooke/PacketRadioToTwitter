@@ -80,7 +80,7 @@ tnc.on("frame",
 
         console.log(new Date() + status);
 
-        //check ignore list (e.g. for WINLINK nodes
+        //check ignore list (e.g. for WINLINK nodes)
         if(config.ignoreList.indexOf(fromStation) == -1 && config.ignoreList.indexOf(toStation) == -1 ) {
             console.log("config.ignoreList check: fromStation / toStation is not in ignore list");
 
@@ -94,13 +94,9 @@ tnc.on("frame",
                     console.log("Callback after TweetCache.insert() was called!");
                     console.log(JSON.stringify(result));
 
+                    //if TweetCache.insert() returns that tweet was not already in the cache
+                    //then call Twitter api to post the new Tweet
                     if (config.sendTweetEnabled == "true") {
-
-                        //TOOD: does tweet still exist in cache?
-                        //if not, send, else skip
-                        //if sending new tweet, add to cache with a 30min expiry
-
-                        //key/value in cache: key=tweetcontent, value=timestamp when last heard, expiry=30mins
 
                         oauth.post('https://api.twitter.com/1.1/statuses/update.json',
                             config.accessToken,
